@@ -1,0 +1,69 @@
+---
+# vars file for inventory
+inventory_sfp_check: false
+inventory_model_output: 'unset'
+inventory_serial_output: 'unset'
+
+_inventory_mb_logic:
+  "dell inc.":
+    serialno: "dmidecode -t system | grep Serial | cut -d ':' -f 2 | cut -d ' ' -f 2"
+    model: "dmidecode -t system | grep 'Product Name' | cut -d ':' -f 2 | cut -d ' ' -f 2-"
+    manufacturer: dell
+  "hp":  # This needs checking
+    serialno: "dmidecode -t system | grep Serial | cut -d ':' -f 2 | cut -d ' ' -f 2"
+    make: hpe
+  "raspberry pi foundation":  # This needs checking
+    serialno: "cat /proc/cpuinfo  | grep Serial | cut -d ':' -f2 | cut -d ' ' -f 2"
+  # Add more manufacturer mappings as needed
+  "default":
+    serialno: "dmidecode -t system | grep Serial | cut -d ':' -f 2 | cut -d ' ' -f 2"
+    model: "dmidecode -t system | grep 'Product Name' | cut -d ':' -f 2 | cut -d ' ' -f 2-"
+inventory_mb_lookup: "{{ _inventory_mb_logic[ansible_board_vendor | lower] | default(_inventory_mb_logic['default']) }}"
+
+_inventory_iftype_logic:
+  ether:
+    10000: "10GBASE-T (10GE)"
+    5000: "5GBASE-T (5GE)"
+    2500: "2.5GBASE-T (2.5GE)"
+    1000: "1000BASE-T (1GE)"
+    100: "100BASE-T1 (10/100ME Single Pair)"
+  sfp:
+    50000: "SFP56 (50GE)"
+    25000: "SFP28 (25GE)"
+  default: "Other"
+inventory_iftype_lookup: "{{ _inventory_iftype_logic[inventory_sfp_check.stdout][inventory_diface_details.speed] | default(_inventory_iftype_logic['default']) }}"  # noqa: yaml[line-length]
+
+inventory_interface_exclude: "{{ inventory_interface_system + inventory_interface_mgmt }}"
+
+inventory_interface_system:
+  - lo
+
+inventory_interface_mgmt:
+  - idrac
+
+
+# _inventory_platform_lookup_linux: "{{ ansible_system }}_{{ ansible_distribution | lower }}{{ if ansible_distribution_major_version '_' + ansible_distribution_major_version }}{{ if ansible_distribution_minor_version '_' + ansible_distribution_minor_version }}"
+# _inventory_platform_lookup_windows:
+
+# inventory_platform_lookup: "{{ if 'linux' in ansible_system | lower _inventory_platform_lookup_linux else if 'windows' in ansible_system | lower _inventory_platform_lookup_windows }}"
+
+# inventory_add_tags:
+#   - 'ansible_inventoried'
+#   - "{{ inventory_platform_lookup }}"
+
+_inventory_os_logic:
+  linux: "{{ ansible_system | lower }}_{{ ansible_distribution | lower }}{% if ansible_distribution_major_version is defined %}_{{ ansible_distribution_major_version }}{% if ansible_distribution_minor_version is defined %}_{{ ansible_distribution_minor_version }}{% endif %}{% endif %}"  # noqa: yaml[line-length]
+  windows: "{{ ansible_system | lower }}"
+  default: "{{ ansible_system | lower }}_{{ ansible_distribution | lower }}"
+
+# _inventory_os_logic:
+#   linux:
+#     ubuntu: "{{ ansible_system | lower }}_{{ ansible_distribution | lower }}_{{ ansible_distribution_major_version }}_{{ ansible_distribution_minor_version }}"
+#     rocky: "{{ ansible_system | lower }}_{{ ansible_distribution | lower }}_{{ ansible_distribution_major_version }}"
+#     centos: "{{ ansible_system | lower }}_{{ ansible_distribution | lower }}_{{ ansible_distribution_major_version }}"
+#     debian: "{{ ansible_system | lower }}_{{ ansible_distribution | lower }}_{{ ansible_distribution_major_version }}_{{ ansible_distribution_minor_version }}"
+#   windows:
+#     server: "{{ ansible_system | lower }}_{{ ansible_distribution | lower }}_server_{{ ansible_distribution_major_version }}"
+#     desktop: "{{ ansible_system | lower }}_{{ ansible_distribution | lower }}_{{ ansible_distribution_major_version }}"
+#   default: "{{ ansible_system | lower }}_{{ ansible_distribution | lower }}"
+# inventory_platform_lookup: "{{ _inventory_os_logic[ansible_system | lower][ansible_distribution | lower] | default(inventory_platform_lookup[default]) }}"

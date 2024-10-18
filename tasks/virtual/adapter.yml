@@ -1,0 +1,63 @@
+---
+- name: Get interface details
+  become: false
+  ansible.builtin.set_fact:
+    inventory_viface_details: "{{ hostvars[inventory_hostname]['ansible_%s' | format(item)] }}"
+
+- name: Set interface name
+  become: false
+  ansible.builtin.set_fact:
+    interface_name: "{{ inventory_viface_details.device }}"
+
+# - name: Debug iface details
+#   ansible.builtin.debug:
+#     var: inventory_viface_details
+
+# - name: Determine if interface is aggregated (team0 or bond)
+#   ansible.builtin.set_fact:
+#     is_aggregate: "{{ 'yes' if interface_name == 'team0' or 'bond' in inventory_viface_details.device else 'no' }}"
+
+- name: "Update network adapter dictionary with interface details for {{ interface_name }}"  # noqa: yaml[line-length] jinja[spacing]
+  delegate_to: localhost
+  connection: local
+  become: false
+  ansible.builtin.set_fact:
+    network_adapters: "{{ network_adapters | combine(
+      {
+          interface_name: {
+              'name': inventory_viface_details.device,
+              'mac': inventory_viface_details.perm_macaddress if 'perm_macaddress' in inventory_viface_details else inventory_viface_details.macaddress if 'macaddress' in inventory_viface_details else 'unknown',
+              'active': inventory_viface_details.active,
+              'mtu': inventory_viface_details.mtu,
+              'bonding': true if 'bonding' in inventory_viface_details.type else false,
+              'parent': inventory_diface_details.slaves[0] if inventory_diface_details.slaves[0] is defined else omit,
+              'bridge': inventory_diface_details.slaves[1] if inventory_diface_details.slaves[1] is defined else omit,
+              'ip_address': inventory_viface_details.ipv4.address if 'ipv4' in inventory_viface_details else 'N/A',
+          }
+      }
+      ) }}"
+
+# - name: Debug variable written to dictionary
+#   ansible.builtin.debug:
+#     msg: "{{ network_adapters[interface_name]['mac'] }}"
+
+- name: "Write interface to Netbox {{ interface_name }}"
+  delegate_to: localhost
+  connection: local
+  become: false
+  netbox.netbox.netbox_vm_interface:
+    netbox_url: "{{ netbox_api }}"
+    netbox_token: "{{ netbox_api_key }}"
+    validate_certs: "{{ netbox_validcert }}"
+    data:
+      virtual_machine: "{{ inventory_hostname }}"
+      name: "{{ network_adapters[interface_name]['name'] }}"
+      # label: "{{ network_adapters[interface_name]['name'] }}"
+      mac_address: "{{ network_adapters[interface_name]['mac'] }}"
+      enabled: "{{ network_adapters[interface_name]['active'] }}"
+      mtu: "{{ network_adapters[interface_name]['mtu'] }}"
+      parent_interface: "{{ network_adapters[interface_name]['parent'] | default(omit) }}"
+      # bridge: "{{ network_adapters[interface_name]['bridge'] | default(omit) }}"
+      tags:
+        - 'ansible_inventoried'
+    state: present

@@ -1,0 +1,11 @@
+---
+
+- name: "Fetch device information from NetBox"
+  ansible.builtin.include_tasks: virtual/fetch.yml
+
+- name: "Fetch device information from NetBox"
+  ansible.builtin.include_tasks: virtual/machine.yml
+
+- name: "Enumerate adapter {{ item }}"
+  ansible.builtin.include_tasks: virtual/adapter.yml
+  loop: "{{ interfaces }}"

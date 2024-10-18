@@ -1,0 +1,87 @@
+---
+- name: Get interface details
+  become: false
+  ansible.builtin.set_fact:
+    inventory_diface_details: "{{ hostvars[inventory_hostname]['ansible_%s' | format(item)] }}"
+
+- name: Set interface name
+  become: false
+  ansible.builtin.set_fact:
+    interface_name: "{{ inventory_diface_details.device }}"
+
+- name: Debug iface details
+  ansible.builtin.debug:
+    var: inventory_diface_details
+
+- name: "Determine if interface is an SFP"
+  become: true
+  ansible.builtin.shell: |
+    if ethtool -m {{ interface_name }} &> /dev/null; then
+      echo "sfp"
+    else
+      echo "ether"
+    fi
+  register: inventory_sfp_check
+  changed_when: false
+
+# - name: check set sfp
+#   ansible.builtin.set_fact:
+#     sfp_check: false
+#   when:
+#     - sfp_check is not defined or sfp_check | length >=0
+
+# - name: Debug var
+#   ansible.builtin.debug:
+#     var: sfp_check
+
+# - name: Determine if interface is aggregated (team0 or bond)
+#   ansible.builtin.set_fact:
+#     is_aggregate: "{{ 'yes' if interface_name == 'team0' or 'bond' in inventory_diface_details.device else 'no' }}"
+
+- name: "Update network adapter dictionary with interface details for {{ interface_name }}"  # noqa: yaml[line-length] jinja[spacing]
+  delegate_to: localhost
+  connection: local
+  become: false
+  ansible.builtin.set_fact:
+    network_adapters: "{{ network_adapters | combine(
+      {
+          interface_name: {
+              'name': inventory_diface_details.device,
+              'type': 'Virtual' if 'bonding' in inventory_diface_details.type else inventory_iftype_lookup,
+              'speed': inventory_diface_details.speed if 'speed' in inventory_diface_details and inventory_diface_details.speed >=1 else omit,
+              'mac': inventory_diface_details.perm_macaddress if 'perm_macaddress' in inventory_diface_details else inventory_diface_details.macaddress if 'macaddress' in inventory_diface_details else 'unknown',
+              'active': inventory_diface_details.active,
+              'mtu': inventory_diface_details.mtu,
+              'bonding': true if 'bonding' in inventory_diface_details.type else false,
+              'parent': inventory_diface_details.slaves[0] if inventory_diface_details.slaves[0] is defined else omit,
+              'bridge': inventory_diface_details.slaves[1] if inventory_diface_details.slaves[1] is defined else omit,
+              'ip_address': inventory_diface_details.ipv4.address if 'ipv4' in inventory_diface_details else 'N/A',
+          }
+      }
+      ) }}"
+
+- name: Debug variable written to dictionary
+  ansible.builtin.debug:
+    msg: "{{ network_adapters[interface_name] }}"
+
+- name: "Write interface to Netbox {{ interface_name }}"
+  delegate_to: localhost
+  connection: local
+  become: false
+  netbox.netbox.netbox_device_interface:
+    netbox_url: "{{ netbox_api }}"
+    netbox_token: "{{ netbox_api_key }}"
+    validate_certs: "{{ netbox_validcert }}"
+    data:
+      device: "{{ inventory_hostname }}"
+      name: "{{ network_adapters[interface_name]['name'] }}"
+      type: "{{ network_adapters[interface_name]['type'] }}"
+      # label: "{{ network_adapters[interface_name]['name'] }}"
+      mac_address: "{{ network_adapters[interface_name]['mac'] }}"
+      enabled: "{{ network_adapters[interface_name]['active'] }}"
+      mtu: "{{ network_adapters[interface_name]['mtu'] }}"
+      speed: "{{ (network_adapters[interface_name]['speed'] * 1000) if network_adapters[interface_name]['speed'] is defined else omit }}"
+      parent_interface: "{{ network_adapters[interface_name]['parent'] | default(omit) }}"
+      # bridge: "{{ network_adapters[interface_name]['bridge'][0] | default(omit) }}"
+      tags: "['ansible_inventoried']"
+    state: present

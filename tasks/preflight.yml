@@ -1,0 +1,35 @@
+---
+
+- name: Check required information has been set
+  delegate_to: localhost
+  connection: local
+  become: false
+  ansible.builtin.assert:
+    that:
+      - netbox_api is defined and netbox_api| length > 0
+      - netbox_api_key is defined and netbox_api_key | length > 0
+
+- name: Check that you can connect to NetBox
+  delegate_to: localhost
+  connection: local
+  become: false
+  ansible.builtin.uri:
+    url: "{{ netbox_api }}"
+    validate_certs: "{{ netbox_validcert }}"
+
+- name: Test NetBox API Key
+  delegate_to: localhost
+  connection: local
+  become: false
+  ansible.builtin.uri:
+    url: "{{ netbox_api }}/api/"
+    validate_certs: "{{ netbox_validcert }}"
+    method: GET
+    return_content: true
+    headers:
+      Authorization: Token {{ netbox_api_key }}
+      Accept: application/json
+  register: api_check
+  failed_when:
+    - "'Invalid token' in api_check.content"
+    - "'Failed to establish connection to Netbox API' in api_check.content"

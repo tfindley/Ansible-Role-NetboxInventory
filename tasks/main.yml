@@ -1,0 +1,30 @@
+---
+# tasks file for inventory
+
+- name: Run PreFlight checks
+  ansible.builtin.include_tasks: preflight.yml
+
+- name: Gather all network interfaces
+  ansible.builtin.set_fact:
+    # interfaces: "{{ ansible_interfaces | reject('search', 'lo') | list | sort }}"
+    interfaces: "{{ ansible_interfaces | difference(inventory_interface_exclude) | list | sort }}"
+
+- name: Initialize network adapters dictionary
+  ansible.builtin.set_fact:
+    network_adapters: {}
+
+- name: Trigger Physical Device inventory
+  when:
+    # - netbox_enabled
+    - ansible_virtualization_role == "host"
+  ansible.builtin.include_tasks: device/main.yml
+
+- name: Trigger Virtual Machine inventory
+  when:
+    # - netbox_enabled
+    - ansible_virtualization_role == "guest"
+  ansible.builtin.include_tasks: virtual/main.yml
+
+# - name: Display network adapter dictionary
+#   ansible.builtin.debug:
+#     var: network_adapters

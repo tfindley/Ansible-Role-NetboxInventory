@@ -1,0 +1,15 @@
+---
+- name: Get existing CI information
+  delegate_to: localhost
+  connection: local
+  become: false
+  check_mode: true
+  register: netbox_ci_info
+  when:
+    - ansible_virtualization_role == "host"
+  netbox.netbox.netbox_device:
+    netbox_url: "{{ netbox_api }}"
+    netbox_token: "{{ netbox_api_key }}"
+    validate_certs: "{{ netbox_validcert }}"
+    data:
+      name: "{{ inventory_hostname }}"

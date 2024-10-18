@@ -1,0 +1,8 @@
+---
+# defaults file for inventory
+
+inventory_os_tag: "os_{{ ansible_system | lower }}_{{ ansible_distribution | lower }}{% if ansible_distribution_major_version is defined %}_{{ ansible_distribution_major_version }}{% if ansible_distribution_minor_version is defined %}_{{ ansible_distribution_minor_version }}{% endif %}{% endif %}"  # noqa: yaml[line-length]
+
+inventory_add_tags:
+  - 'ansible_inventoried'
+  - "{{ inventory_os_tag }}"

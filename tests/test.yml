@@ -1,0 +1,6 @@
+---
+- name: Test inventory role
+  hosts: localhost
+  remote_user: root
+  roles:
+    - inventory
