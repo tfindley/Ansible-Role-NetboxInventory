@@ -3,9 +3,17 @@
 - name: "Fetch device information from NetBox"
   ansible.builtin.include_tasks: device/fetch.yml
 
-- name: "Fetch device information from NetBox"
+- name: "Enumerate device and write to Netbox"
   ansible.builtin.include_tasks: device/device.yml
 
-- name: "Enumerate adapter"
+- name: "Enumerate device adapter and write to Netbox - {{ item }}"
   ansible.builtin.include_tasks: device/adapter.yml
   loop: "{{ interfaces }}"
+  when:
+    - hostvars[inventory_hostname]['ansible_%s' | format(item)]['type'] != 'bonding'
+
+- name: "Enumerate device bond and write to Netbox - {{ item }}"
+  ansible.builtin.include_tasks: device/adapter.yml
+  loop: "{{ interfaces }}"
+  when:
+    - hostvars[inventory_hostname]['ansible_%s' | format(item)]['type'] == 'bonding'

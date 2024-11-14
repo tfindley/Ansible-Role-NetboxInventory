@@ -1,11 +1,19 @@
 ---
 
-- name: "Fetch device information from NetBox"
+- name: "Fetch VM information from NetBox"
   ansible.builtin.include_tasks: virtual/fetch.yml
 
-- name: "Fetch device information from NetBox"
+- name: "Enumerate VM and write to Netbox"
   ansible.builtin.include_tasks: virtual/machine.yml
 
-- name: "Enumerate adapter {{ item }}"
+- name: "Enumerate VM adapter and write to Netbox - {{ item }}"
   ansible.builtin.include_tasks: virtual/adapter.yml
   loop: "{{ interfaces }}"
+  when:
+    - hostvars[inventory_hostname]['ansible_%s' | format(item)]['type'] != 'bonding'
+
+- name: "Enumerate VM bond and write to Netbox - {{ item }}"
+  ansible.builtin.include_tasks: virtual/adapter.yml
+  loop: "{{ interfaces }}"
+  when:
+    - hostvars[inventory_hostname]['ansible_%s' | format(item)]['type'] == 'bonding'
