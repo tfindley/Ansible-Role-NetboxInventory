@@ -3,6 +3,14 @@ Role Name
 
 A brief description of the role goes here.
 
+Execution order
+
+- Determine Host (Physical) or Guest (Virtual) machine
+- Pull any existing records from Netbox
+- Write new record to Netbox
+- Enumerate network adapters and create in Netbox
+- Enumerate bond adapters and create in Netbox
+
 Requirements
 ------------
 

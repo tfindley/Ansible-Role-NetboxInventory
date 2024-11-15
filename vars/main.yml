@@ -4,6 +4,8 @@ inventory_sfp_check: false
 inventory_model_output: 'unset'
 inventory_serial_output: 'unset'
 
+_inventory_primary_ipv4_cidr_logic: "{{ ansible_default_ipv4.network }}/{{ ansible_default_ipv4.netmask }}"
+
 _inventory_mb_logic:
   "dell inc.":
     serialno: "dmidecode -t system | grep Serial | cut -d ':' -f 2 | cut -d ' ' -f 2"

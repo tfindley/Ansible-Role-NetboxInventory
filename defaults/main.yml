@@ -15,3 +15,5 @@ inventory_custom_fields_mapping:
   ssh_host_key_ed25519: "{{ ansible_ssh_host_key_ed25519_public }}"
   # ssh_host_key_rsa_public: "{{ ansible_ssh_host_key_rsa_public }}"
   os_version: "{{ inventory_os_selection_slug }}"
+
+inventory_primary_ipv4: "{{ ansible_default_ipv4.address }}/{{ _inventory_primary_ipv4_cidr_logic | ansible.utils.ipaddr('prefix') }}"
