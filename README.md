@@ -1,5 +1,4 @@
 # Netbox Inventory
-=========
 
 This role will inventory your device or VM and update that record in Netbox
 
@@ -36,9 +35,25 @@ A list of other roles hosted on Galaxy should go here, plus any details in regar
 
 Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+```yaml
+---
+- name: Inventory CI into Netbox
+  hosts:
+    - hostname
+    - group
+
+    # - p-vibobjectstor-2.vib.local
+  # become: true  # This shouldn't occour at the playbook level
+  gather_facts: true
+  roles:
+    - inventory
+  vars:
+    # Standard variables for Netbox integration
+    netbox_api: "{{ lookup('env', 'NETBOX_API') }}"  # This must be defined in your environmental variables.
+    netbox_api_key: "{{ lookup('env', 'NETBOX_API_KEY') }}"  # This must be defined in your environmental variables. DO NOT HARD CODE!
+    netbox_validcert: false  # Change this variable to true if your Netbox server is using untrusted (i.e: self-signed) certificates
+
+```
 
 ## License
 
@@ -46,7 +61,7 @@ BSD
 
 ## Author Information
 
-Tristan Findley
+**Tristan Findley**
 
 Find out more about me [here](https://about.me/tfindley).
 
