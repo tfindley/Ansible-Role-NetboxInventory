@@ -6,8 +6,8 @@
   become: false
   ansible.builtin.assert:
     that:
-      - netbox_api is defined and netbox_api| length > 0
-      - netbox_api_key is defined and netbox_api_key | length > 0
+      - inventory_netbox_api is defined and inventory_netbox_api | length > 0
+      - inventory_netbox_api_key is defined and inventory_netbox_api_key | length > 0
 
 - name: Check that you can connect to NetBox
   delegate_to: localhost
