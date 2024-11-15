@@ -1,15 +1,13 @@
 ---
 
-# ------
-
 - name: Write VM information
   delegate_to: localhost
   connection: local
   become: false
   netbox.netbox.netbox_virtual_machine:
-    netbox_url: "{{ netbox_api }}"
-    netbox_token: "{{ netbox_api_key }}"
-    validate_certs: "{{ netbox_validcert }}"
+    netbox_url: "{{ inventory_netbox_api }}"
+    netbox_token: "{{ inventory_netbox_api_key }}"
+    validate_certs: "{{ inventory_netbox_validcert }}"
     data:
       name: "{{ inventory_hostname }}"
       custom_fields: "{{ inventory_custom_fields_mapping }}"

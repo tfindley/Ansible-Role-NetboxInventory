@@ -14,20 +14,20 @@
   connection: local
   become: false
   ansible.builtin.uri:
-    url: "{{ netbox_api }}"
-    validate_certs: "{{ netbox_validcert }}"
+    url: "{{ inventory_netbox_api }}"
+    validate_certs: "{{ inventory_netbox_validcert }}"
 
 - name: Test NetBox API Key
   delegate_to: localhost
   connection: local
   become: false
   ansible.builtin.uri:
-    url: "{{ netbox_api }}/api/"
-    validate_certs: "{{ netbox_validcert }}"
+    url: "{{ inventory_netbox_api }}/api/"
+    validate_certs: "{{ inventory_netbox_validcert }}"
     method: GET
     return_content: true
     headers:
-      Authorization: Token {{ netbox_api_key }}
+      Authorization: Token {{ inventory_netbox_api_key }}
       Accept: application/json
   register: api_check
   failed_when:
