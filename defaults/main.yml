@@ -2,7 +2,7 @@
 # defaults file for inventory
 
 # Input variables
-inventory_netbox_api: "{{ netbox_api}}"
+inventory_netbox_api: "{{ netbox_api }}"
 inventory_netbox_api_key: "{{ netbox_api_key }}"
 inventory_netbox_validcert: "{{ netbox_validcert | default(true) }}"
 
