@@ -1,6 +1,11 @@
 ---
 # defaults file for inventory
 
+# Input variables
+inventory_netbox_api: "{{ netbox_api }}"
+inventory_netbox_api_key: "{{ netbox_api_key }}"
+inventory_netbox_validcert: "{{ netbox_validcert | default(true) }}"
+
 # inventory_os_tag: "os_{{ ansible_system | lower }}_{{ ansible_distribution | lower }}{% if ansible_distribution_major_version is defined %}_{{ ansible_distribution_major_version }}{% if ansible_distribution_minor_version is defined %}_{{ ansible_distribution_minor_version }}{% endif %}{% endif %}"  # noqa: yaml[line-length]
 inventory_os_selection_slug: "{{ ansible_system | lower }}_{{ ansible_distribution | lower }}{% if ansible_distribution_major_version is defined %}_{{ ansible_distribution_major_version }}{% if ansible_distribution_minor_version is defined %}_{{ ansible_distribution_minor_version }}{% endif %}{% endif %}"  # noqa: yaml[line-length]
 inventory_os_tag: "os_{{ inventory_os_selection_slug }}"  # No need to do this twice so we use the OS selection slug var.
@@ -15,3 +20,5 @@ inventory_custom_fields_mapping:
   ssh_host_key_ed25519: "{{ ansible_ssh_host_key_ed25519_public }}"
   # ssh_host_key_rsa_public: "{{ ansible_ssh_host_key_rsa_public }}"
   os_version: "{{ inventory_os_selection_slug }}"
+
+inventory_primary_ipv4: "{{ ansible_default_ipv4.address }}/{{ _inventory_primary_ipv4_cidr_logic | ansible.utils.ipaddr('prefix') }}"

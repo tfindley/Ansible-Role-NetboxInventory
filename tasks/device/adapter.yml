@@ -69,9 +69,9 @@
   connection: local
   become: false
   netbox.netbox.netbox_device_interface:
-    netbox_url: "{{ netbox_api }}"
-    netbox_token: "{{ netbox_api_key }}"
-    validate_certs: "{{ netbox_validcert }}"
+    netbox_url: "{{ inventory_netbox_api }}"
+    netbox_token: "{{ inventory_netbox_api_key }}"
+    validate_certs: "{{ inventory_netbox_validcert }}"
     data:
       device: "{{ inventory_hostname }}"
       name: "{{ network_adapters[interface_name]['name'] }}"

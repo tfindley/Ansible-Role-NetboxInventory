@@ -1,24 +1,16 @@
 ---
 
-# ------
-
-- name: Calculate VM netmask
-  ansible.builtin.set_fact:
-    _inventory_machine_cidr: "{{ ansible_default_ipv4.network }}/{{ ansible_default_ipv4.netmask }}"
-
-# ------
-
 - name: Write VM information
   delegate_to: localhost
   connection: local
   become: false
   netbox.netbox.netbox_virtual_machine:
-    netbox_url: "{{ netbox_api }}"
-    netbox_token: "{{ netbox_api_key }}"
-    validate_certs: "{{ netbox_validcert }}"
+    netbox_url: "{{ inventory_netbox_api }}"
+    netbox_token: "{{ inventory_netbox_api_key }}"
+    validate_certs: "{{ inventory_netbox_validcert }}"
     data:
       name: "{{ inventory_hostname }}"
       custom_fields: "{{ inventory_custom_fields_mapping }}"
-      primary_ip4: "{{ ansible_default_ipv4.address }}/{{ _inventory_machine_cidr | ansible.utils.ipaddr('prefix') }}"
+      primary_ip4: "{{ inventory_primary_ipv4 }}"
       tags: "{{ netbox_ci_info.virtual_machine.tags + inventory_add_tags }}"
     state: present
