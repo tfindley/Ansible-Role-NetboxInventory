@@ -1,6 +1,6 @@
 # Netbox Inventory
 
-[![ansible-lint](https://github.com/tfindley/Ansible-Role-NetboxInventory/actions/workflows/ansible-lint.yml/badge.svg?branch=main)](https://github.com/tfindley/Ansible-Role-NetboxInventory/actions/workflows/ansible-lint.yml)
+[![ansible-lint](https://github.com/tfindley/Ansible-Role-NetboxInventory/actions/workflows/ansible-lint.yml/badge.svg?branch=dev)](https://github.com/tfindley/Ansible-Role-NetboxInventory/actions/workflows/ansible-lint.yml)
 
 This role will inventory your device or VM and update that record in Netbox
 
