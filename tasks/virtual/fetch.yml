@@ -7,8 +7,8 @@
   check_mode: true
   register: netbox_ci_info
   netbox.netbox.netbox_virtual_machine:
-    netbox_url: "{{ netbox_api }}"
-    netbox_token: "{{ netbox_api_key }}"
-    validate_certs: "{{ netbox_validcert }}"
+    netbox_url: "{{ inventory_netbox_api }}"
+    netbox_token: "{{ inventory_netbox_api_key }}"
+    validate_certs: "{{ inventory_netbox_validcert }}"
     data:
       name: "{{ inventory_hostname }}"
