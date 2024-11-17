@@ -1,4 +1,4 @@
 ---
 collections:
   - name: netbox.netbox
-    version: '2.9.10'
+    version: '3.19.0'
