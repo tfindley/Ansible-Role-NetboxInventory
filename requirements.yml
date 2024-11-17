@@ -1,0 +1,4 @@
+---
+collections:
+  - name: netbox.netbox
+    version: '2.9.10'
