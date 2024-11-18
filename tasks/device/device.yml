@@ -41,7 +41,7 @@
     data:
       name: "{{ inventory_hostname }}"
       # device_type: "{{ inventory_model_output.stdout | lower | replace(' ', '-') }}"
-      custom_fields: "{{ inventory_custom_fields_mapping }}"
+      custom_fields: "{{ inventory_custom_fields_mapping | default(omit)}}"
       device_type: "{{ inventory_mb_lookup.manufacturer }}_{{ inventory_model_output.stdout | lower | replace(' ', '_') }}"
       primary_ip4: "{{ inventory_primary_ipv4 }}"
       serial: "{{ inventory_serial_output.stdout | default(omit) }}"

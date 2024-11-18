@@ -1,0 +1,12 @@
+---
+
+# Create custom fields
+- name: Inventory.Build - Construct custom fields
+  netbox.netbox.netbox_custom_field:
+    netbox_url: "{{ inventory_netbox_api }}"
+    netbox_token: "{{ inventory_netbox_api_key }}"
+    validate_certs: "{{ inventory_netbox_validcert }}"
+    data: "{{ item }}"
+  loop: "{{ inventory_build_custom_fields  }}"
+  loop_control:
+    name: "{{ item.name }}"
