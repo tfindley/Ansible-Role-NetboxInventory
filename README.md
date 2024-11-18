@@ -15,6 +15,7 @@ Execution order
 ## Requirements
 
 In order to run this role you will require:
+
 - A working installation of Netbox with a reachable API from your Ansible Host machine (the machine you wish to run Ansible on)
 
 The following variables will also need to be set:
@@ -27,7 +28,12 @@ The following variables will also need to be set:
 
 ## Role Variables
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+This role has a number of variables that allow you to override the default behaviour
+
+### Custom Fields
+
+You can customise the 'Custom Fields mapping' for Virtual Machines and Devies using the `inventory_build_custom_fields` variable.
+By default, the following custom fields are set to be built and populated. I suggest not changing these, and if you want to add more you should include these by default otherwise the default logic of the script will break - We may alter this in the future!
 
 ## Dependencies
 
@@ -49,11 +55,12 @@ Including an example of how to use your role (for instance, with variables passe
   gather_facts: true
   roles:
     - inventory
+  
   vars:
     # Standard variables for Netbox integration
-    netbox_api: "{{ lookup('env', 'NETBOX_API') }}"  # This must be defined in your environmental variables.
-    netbox_api_key: "{{ lookup('env', 'NETBOX_API_KEY') }}"  # This must be defined in your environmental variables. DO NOT HARD CODE!
-    netbox_validcert: false  # Change this variable to true if your Netbox server is using untrusted (i.e: self-signed) certificates
+    inventory_netbox_api: "{{ lookup('env', 'NETBOX_API') }}"  # This must be defined in your environmental variables.
+    inventory_netbox_api_key: "{{ lookup('env', 'NETBOX_API_KEY') }}"  # This must be defined in your environmental variables. DO NOT HARD CODE!
+    inventory_netbox_validcert: false  # Change this variable to true if your Netbox server is using untrusted (i.e: self-signed) certificates
 
 ```
 
